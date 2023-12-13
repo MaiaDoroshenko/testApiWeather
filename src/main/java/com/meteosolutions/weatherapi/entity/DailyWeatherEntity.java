@@ -28,6 +28,8 @@ public class DailyWeatherEntity {
     private Boolean nightHasPrecipitation;
     private String precipitationType;
     private String precipitationIntensity;
+    @Column(name = "city_name")
+    private String cityName;
 
     @ManyToOne
     @JoinColumn(name = "city_info_id")

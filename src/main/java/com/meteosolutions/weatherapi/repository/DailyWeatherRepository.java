@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface DailyWeatherRepository extends JpaRepository<DailyWeatherEntity,Long> {
-    Optional<DailyWeatherEntity> findByCity(String cityName);
+    Optional<DailyWeatherEntity> findByCityName(String cityName);
 
 }

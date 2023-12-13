@@ -1,5 +1,6 @@
 package com.meteosolutions.weatherapi.helper;
 
+import com.meteosolutions.weatherapi.dto.WeatherCityDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,27 +64,32 @@ class ApiWeatherHelperTest {
         String locationKey = "12345";
 
 
-        when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(String.class)).thenReturn(Mono.just(locationKey));
+            when(webClient.get()).thenReturn(requestHeadersUriSpec);
+            when(requestHeadersUriSpec.uri(any(String.class))).thenReturn(requestHeadersSpec);
+            when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+            when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
+            when(responseSpec.bodyToMono(String.class)).thenReturn(Mono.just(locationKey));
 
-        StepVerifier.create(apiWeatherHelper.getLocationKey(cityName))
-                .expectNext(locationKey)
-                .verifyComplete();
+            StepVerifier.create(apiWeatherHelper.getLocationKey(cityName))
+                    .expectNext(locationKey)
+                    .verifyComplete();
     }
 
 
-       /* @Test
+        @Test
         void testGetWeatherInfo () {
-        String locationKey = "12345";
-        WeatherInfoDTO weatherInfo = new WeatherInfoDTO();
+            String locationKey = "12345";
+            WeatherCityDTO weatherInfo = new WeatherCityDTO(); // Cambia WeatherInfoDTO por WeatherCityDTO o usa el DTO correcto que retornes
 
-        when(requestHeadersUriSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(WeatherInfoDTO.class)).thenReturn(Mono.just(weatherInfo));
+            when(webClient.get()).thenReturn(requestHeadersUriSpec);
+            when(requestHeadersUriSpec.uri(any(String.class))).thenReturn(requestHeadersSpec);
+            when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+            when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
+            when(responseSpec.bodyToMono(WeatherCityDTO.class)).thenReturn(Mono.just(weatherInfo)); // Cambia WeatherInfoDTO por WeatherCityDTO o usa el DTO correcto que retornes
 
-        StepVerifier.create(apiWeatherHelper.getWeatherInfo(locationKey))
-                .expectNext(weatherInfo)
-                .verifyComplete();
-    }*/
+            StepVerifier.create(apiWeatherHelper.getWeatherInfo(locationKey))
+                    .expectNext(weatherInfo)
+                    .verifyComplete();
+    }
 
     }
