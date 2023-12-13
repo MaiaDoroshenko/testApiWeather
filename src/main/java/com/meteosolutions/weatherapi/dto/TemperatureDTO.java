@@ -5,9 +5,12 @@ import lombok.Data;
 
 @Data
 public class TemperatureDTO {
-    @JsonProperty("Minimum")
-    private ValueDTO minimum;
+    @JsonProperty(value = "Value")
+    private Double value;
 
-    @JsonProperty("Maximum")
-    private ValueDTO maximum;
+    @JsonProperty(value = "Unit")
+    private String unit;
+
+    @JsonProperty(value = "UnitType")
+    private Integer unitType;
 }

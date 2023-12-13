@@ -11,14 +11,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="daily_forecast")
-public class DailyForecastEntity {
+@Table(name="daily_weather")
+public class DailyWeatherEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private LocalDateTime date;
-    private Long epochDate;
+    private Double minTemperature;
+    private Double maxTemperature;
     private Integer dayIcon;
     private String dayIconPhrase;
     private Boolean dayHasPrecipitation;
@@ -29,6 +30,7 @@ public class DailyForecastEntity {
     private String precipitationIntensity;
 
     @ManyToOne
-    @JoinColumn(name = "weather_city_id")
-    private WeatherCityEntity weatherCity;
+    @JoinColumn(name = "city_info_id")
+    private CityInfo cityInfo;
+
 }

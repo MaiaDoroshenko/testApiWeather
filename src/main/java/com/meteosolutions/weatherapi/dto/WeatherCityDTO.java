@@ -6,9 +6,16 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class WeatherInfoDTO {
-    @JsonProperty("locationName")
-    private LocationDTO  locationName;
+public class WeatherCityDTO {
+    @JsonProperty("CityKey")
+    private String cityKey;
+
+    @JsonProperty("CityName")
+    private String cityName;
+
+    @JsonProperty("Headline")
+    private HeadlineDTO headline;
+
     @JsonProperty("DailyForecasts")
     private List<DailyForecastDTO> dailyForecasts;
 }

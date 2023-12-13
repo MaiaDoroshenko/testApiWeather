@@ -1,26 +1,20 @@
 package com.meteosolutions.weatherapi.entity;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.context.annotation.Bean;
 
 import javax.persistence.*;
-
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class LocationEntity {
+@Table(name="City_Info")
+public class CityInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String key;
     private String localizedName;
-    private String countryName;
-    @ManyToOne
-    @JoinColumn(name = "region_id")
-    private RegionEntity region;
 }

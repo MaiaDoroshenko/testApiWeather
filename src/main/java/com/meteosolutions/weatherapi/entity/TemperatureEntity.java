@@ -12,12 +12,16 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(name="temperature")
 public class TemperatureEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    private Double value;
+    private String unit;
+    private Integer unitType;
+
     @OneToOne
-    private ValueEntity minimum;
-    @OneToOne
-    private ValueEntity maximum;
+    @JoinColumn(name = "daily_weather_id")
+    private DailyWeatherEntity dailyForecast;
 }

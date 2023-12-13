@@ -1,10 +1,10 @@
 package com.meteosolutions.weatherapi.helper;
 
-import com.meteosolutions.weatherapi.dto.WeatherInfoDTO;
+import com.meteosolutions.weatherapi.dto.DailyForecastDTO;
+import com.meteosolutions.weatherapi.dto.WeatherCityDTO;
 import com.meteosolutions.weatherapi.exception.CustomClientException;
 import com.meteosolutions.weatherapi.exception.CustomServerException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class ApiWeatherHelper {
     private WebClient webClient;
-    private String locationQueryParam;
+    private String cityName;
 
     private String baseApiUrl;
     private String locationsPath;
@@ -26,13 +26,13 @@ public class ApiWeatherHelper {
 
 
     public ApiWeatherHelper(WebClient.Builder webClientBuilder,
-                            @Value("${user.base.name}") String locationQueryParam,
+                            @Value("${user.base.name}") String cityName,
                             @Value("${api.base.url}") String baseApiUrl,
                             @Value("${api.locations.url}") String locationsPath,
                             @Value("${api.forecasts.url}") String forecastsPath,
                             @Value("${api.apiKey}") String apiKey) {
         this.webClient = webClientBuilder.baseUrl(baseApiUrl).build();
-        this.locationQueryParam = locationQueryParam;
+        this.cityName = cityName;
         this.baseApiUrl = baseApiUrl;
         this.locationsPath = locationsPath;
         this.forecastsPath = forecastsPath;
@@ -43,11 +43,9 @@ public class ApiWeatherHelper {
         log.info("Locations Path: {}", locationsPath);
         log.info("Forecasts Path: {}", forecastsPath);
         log.info("API Key apiKey : {} ;", apiKey);
-        log.info("Location Query Param : {};", locationQueryParam);
+        log.info("Location Query Param : {};", cityName);
 
     }
-
-
 
     private String buildLocationUri(String cityName) {
         return UriComponentsBuilder.fromPath(locationsPath)
@@ -56,8 +54,23 @@ public class ApiWeatherHelper {
                 .toUriString();
     }
 
+    public Mono<WeatherCityDTO> getWeatherInfoByCity(String cityName) {
+        return getLocationKey(cityName)
+                .flatMap(locationKey -> getWeatherInfo(locationKey)
+                        .map(headline -> {
+                            WeatherCityDTO weatherCityDTO = new WeatherCityDTO();
+                            weatherCityDTO.setCityKey(locationKey);
+                            weatherCityDTO.setCityName(cityName);
+                            weatherCityDTO.setHeadline(headline.getHeadline());
+                            return weatherCityDTO;
+                        })
+                )
+                .onErrorResume(error -> Mono.error(new CustomClientException("Failed to fetch weather info for city: " + cityName)));
+    }
+
     public Mono<String> getLocationKey(String cityName) {
         String locationUri = buildLocationUri(cityName);
+        log.debug("Getting location key for city '{}'. URL: {}", cityName, locationUri);
         return webClient.get()
                 .uri(locationUri)
                 .retrieve()
@@ -68,7 +81,8 @@ public class ApiWeatherHelper {
                 .bodyToMono(String.class);
     }
 
-    public Mono<WeatherInfoDTO> getWeatherInfo(String locationKey) {
+
+    public Mono<WeatherCityDTO> getWeatherInfo(String locationKey) {
         String completeForecastUri = baseApiUrl + forecastsPath.replace("{locationKey}", locationKey) + "?apikey=" + apiKey;
         return webClient.get()
                 .uri(completeForecastUri)
@@ -77,6 +91,17 @@ public class ApiWeatherHelper {
                         Mono.error(new CustomClientException("Client error:" + clientResponse.statusCode())))
                 .onStatus(HttpStatus::is5xxServerError, clientResponse ->
                         Mono.error(new CustomServerException("Server error:" + clientResponse.statusCode())))
-                .bodyToMono(WeatherInfoDTO.class);
+                .bodyToMono(WeatherCityDTO.class);
+    }
+    public Mono<DailyForecastDTO> getDailyForecast(String cityKey) {
+        String completeDailyForecastUri = baseApiUrl + forecastsPath.replace("{locationKey}", cityKey) + "?apikey=" + apiKey;
+        return webClient.get()
+                .uri(completeDailyForecastUri)
+                .retrieve()
+                .onStatus(HttpStatus::is4xxClientError, clientResponse ->
+                        Mono.error(new CustomClientException("Client error:" + clientResponse.statusCode())))
+                .onStatus(HttpStatus::is5xxServerError, clientResponse ->
+                        Mono.error(new CustomServerException("Server error:" + clientResponse.statusCode())))
+                .bodyToMono(DailyForecastDTO.class);
     }
 }
